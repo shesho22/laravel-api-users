@@ -1,0 +1,99 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\Request;
+
+class UserController extends Controller
+{
+    // GET /api/users -> Listar todos
+    public function index()
+    {
+        return response()->json(User::all(), 200);
+    }
+
+    // POST /api/users -> Crear nuevo usuario
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'group_id' => 'required|integer',
+            'admin'    => 'required|boolean',
+            'name'     => 'required|string|max:255',
+            'cedula'   => 'required|string|unique:users',
+            'email'    => 'required|email|unique:users',
+            'pass'     => 'required|string|min:4'
+        ]);
+
+        $user = User::create($validated);
+
+        return response()->json([
+            'message' => 'Usuario creado con éxito',
+            'user' => $user
+        ], 201);
+    }
+
+    // GET /api/users/{id} -> Ver detalle
+    public function show($id)
+    {
+        $user = User::find($id);
+        if (!$user) return response()->json(['error' => 'No encontrado'], 404);
+
+        return response()->json($user);
+    }
+
+    // PUT /api/users/{id} -> Actualizar
+    public function update(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $validated = $request->validate([
+            'group_id' => 'integer',
+            'admin'    => 'boolean',
+            'name'     => 'string|max:255',
+            'cedula'   => 'string|unique:users,cedula,' . $id,
+            'email'    => 'email|unique:users,email,' . $id,
+            'pass'     => 'string'
+        ]);
+
+        $user->update($validated);
+
+        return response()->json([
+            'message' => 'Usuario actualizado',
+            'user' => $user
+        ]);
+    }
+    public function updatePassword(Request $request, $id)
+    {
+        // 1. Validar que la nueva contraseña llegue y sea segura (mínimo 6 caracteres por ejemplo)
+        $request->validate([
+            'pass' => 'required|string|min:6|confirmed' // 'confirmed' busca un campo 'pass_confirmation'
+        ]);
+        if (auth()->user()->admin == 0 && auth()->id() != $id) {
+            return response()->json(['error' => 'No puedes cambiar contraseñas ajenas'], 403);
+        }
+        // 2. Buscar al usuario
+        $user = User::find($id);
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no encontrado'], 404);
+        }
+
+        // 3. Actualizar la columna 'pass' en texto plano
+        $user->pass = $request->pass;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Contraseña actualizada con éxito'
+        ], 200);
+    }
+    // DELETE /api/users/{id} -> Eliminar
+    public function destroy($id)
+    {
+        $user = User::find($id);
+        if (!$user) return response()->json(['error' => 'No encontrado'], 404);
+
+        //$user->delete();
+        return response()->json(['message' => 'no se elimina el usuario']);
+    }
+}

@@ -9,20 +9,27 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
-
+    protected $table = 'user';
     protected $fillable = [
+        'group_id',
+        'admin',
         'name',
+        'cedula',
         'email',
-        'password',
-        'role'
+        'pass'
     ];
 
     protected $hidden = [
-        'password'
+        'pass',
     ];
-
     // JWT
 
+    public function getAuthPassword()
+    {
+        return $this->pass;
+    }
+
+    // --- Métodos Requeridos por JWT ---
     public function getJWTIdentifier()
     {
         return $this->getKey();
