@@ -24,7 +24,7 @@ class UserService
         $user = $this->repository->create([
             'name'     => $dto->name,
             'email'    => $dto->email,
-            'password' => Hash::make($dto->password),
+            'password' => Hash::make($dto->pass),
             'role'     => $dto->role
         ]);
 

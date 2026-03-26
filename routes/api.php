@@ -2,8 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\empresa\EmpresaController;
 use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\Api\UserGroupController;
+use App\Http\Controllers\Api\grupos\UserGroupController;
+use App\Http\Controllers\Api\questionarie\UserQuestionnarieController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,9 +37,12 @@ Route::middleware('auth:api')->group(function () {
          * GET    /users/{user}   -> show    (Ver uno)
          * PUT    /users/{user}   -> update  (Editar)
          * DELETE /users/{user}   -> destroy (Eliminar)
-         */
+        */
         Route::match(['put', 'patch','get'], '/users/{id}/password', [UserController::class, 'updatePassword']);
         Route::apiResource('users', UserController::class);
-        Route::apiResource('user-groups', UserGroupController::class);
+        Route::apiResource('company', EmpresaController::class);
+        Route::apiResource('user-groups',UserGroupController::class);
+        Route::get('groups/{groupId}/questionnaries', [UserQuestionnarieController::class, 'questionnariesByGroup']);
+        Route::get('groups/{groupId}/questionnaries/{questionariesId}/report', [UserQuestionnarieController::class, 'UsersquestionnariesByGroup']);
     });
 });
