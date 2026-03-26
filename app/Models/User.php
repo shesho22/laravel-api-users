@@ -10,6 +10,7 @@ class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
     protected $table = 'user';
+    public $timestamps = false;
     protected $fillable = [
         'group_id',
         'admin',

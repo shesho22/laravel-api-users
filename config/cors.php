@@ -19,7 +19,10 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => [
+        'https://gestion.inteligenciaeinnovacion.com.co', // Tu URL de producción
+        'http://localhost:4200',                         // Tu entorno local
+    ],
 
     'allowed_origins_patterns' => [],
 

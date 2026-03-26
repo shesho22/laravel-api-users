@@ -38,7 +38,7 @@ Route::middleware('auth:api')->group(function () {
          * PUT    /users/{user}   -> update  (Editar)
          * DELETE /users/{user}   -> destroy (Eliminar)
         */
-        Route::match(['put', 'patch','get'], '/users/{id}/password', [UserController::class, 'updatePassword']);
+        Route::put('/users/{id}/password', [UserController::class, 'updatePassword']);
         Route::apiResource('users', UserController::class);
         Route::apiResource('company', EmpresaController::class);
         Route::apiResource('user-groups',UserGroupController::class);
