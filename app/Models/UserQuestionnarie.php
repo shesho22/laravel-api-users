@@ -20,6 +20,7 @@ class UserQuestionnarie extends Model
         'weight',
         'real_weight',
         'start',
+        'state',
         'deadline',
     ];
 }

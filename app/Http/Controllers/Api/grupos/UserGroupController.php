@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Api\grupos;
 
 use App\Http\Controllers\Controller;
+use App\Models\QuestionnarieGroup;
 use App\Models\UserGroup;
+use App\Models\UserQuestionnarie;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class UserGroupController extends Controller
 {
@@ -18,11 +21,24 @@ class UserGroupController extends Controller
         $validated = $request->validate([
             'company_id' => 'required|integer',
             'name'       => 'required|string|max:255',
-            'bind'       => 'required|integer', // Ajusta el tipo según tu lógica
-            'creation'   => 'required|date'     // O string si es un timestamp manual
+            'bind'       => 'required|integer',
         ]);
+        $validated['creation'] = now()->timezone('America/Bogota')->format('Y-m-d H:i:s');
 
-        $group = UserGroup::create($validated);
+        $group = DB::transaction(function () use ($validated) {
+            $group = UserGroup::create($validated);
+
+            QuestionnarieGroup::create([
+                'id' => $group->id,
+                'company_id' => $group->company_id,
+                'name' => mb_substr($group->name, 0, 100),
+                'bind' => $group->bind,
+                'creation' => $group->creation,
+            ]);
+
+            return $group;
+        });
+
         return response()->json($group, 201);
     }
 
@@ -36,13 +52,34 @@ class UserGroupController extends Controller
     public function update(Request $request, $id)
     {
         $group = UserGroup::findOrFail($id);
-
         $group->update($request->all());
-
         return response()->json([
             'message' => 'Grupo actualizado',
             'group' => $group
         ]);
+    }
+    public function deadlineByGroup(Request $request, int $groupId, int $questionnaireId)
+    {
+        $validated = $request->validate([
+            'deadline' => 'required|string',
+        ]);
+
+        $updated = UserQuestionnarie::query()
+            ->where('group_id', $groupId)
+            ->where('questionnarie_id', $questionnaireId)
+            ->update(['deadline' => $validated['deadline']]);
+
+        if ($updated === 0) {
+            return response()->json([
+                'error' => 'No se encontraron registros para este grupo y cuestionario',
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Deadline actualizado',
+            'updated' => $updated,
+            'deadline' => $validated['deadline'],
+        ], 200);
     }
 
     public function destroy($id)

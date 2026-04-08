@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\empresa\EmpresaController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\grupos\UserGroupController;
+use App\Http\Controllers\Api\questionarie\QuestionnarieController;
 use App\Http\Controllers\Api\questionarie\UserQuestionnarieController;
 
 /*
@@ -40,9 +41,14 @@ Route::middleware('auth:api')->group(function () {
         */
         Route::put('/users/{id}/password', [UserController::class, 'updatePassword']);
         Route::apiResource('users', UserController::class);
+        Route::get('company/{companyId}/questionnaries/past', [QuestionnarieController::class, 'past']);
         Route::apiResource('company', EmpresaController::class);
         Route::apiResource('user-groups',UserGroupController::class);
+        Route::get('users-by-company/{companyId}', [UserController::class, 'usersByCompany']);
+        Route::get('questionnaries/all', [QuestionnarieController::class, 'all']);
         Route::get('groups/{groupId}/questionnaries', [UserQuestionnarieController::class, 'questionnariesByGroup']);
         Route::get('groups/{groupId}/questionnaries/{questionariesId}/report', [UserQuestionnarieController::class, 'UsersquestionnariesByGroup']);
+        Route::put('groups/{groupId}/questionnaries/{questionnaireId}/deadline', [UserGroupController::class, 'deadlineByGroup']);
+        Route::post('evaluaciones/masiva', [UserQuestionnarieController::class, 'masiva']);
     });
 });

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
+use App\Models\UserGroup;
 
 class UserController extends Controller
 {
@@ -33,8 +34,8 @@ class UserController extends Controller
             'group_id' => 'required|integer',
             'admin'    => 'required|boolean',
             'name'     => 'required|string|max:255',
-            'cedula'   => 'required|string|unique:users',
-            'email'    => 'required|email|unique:users',
+            'cedula'   => 'required|string|unique:user',
+            'email'    => 'required|email|unique:user',
             'pass'     => 'required|string|min:4'
         ]);
 
@@ -64,8 +65,8 @@ class UserController extends Controller
             'group_id' => 'integer',
             'admin'    => 'boolean',
             'name'     => 'string|max:255',
-            'cedula'   => 'string|unique:users,cedula,' . $id,
-            'email'    => 'email|unique:users,email,' . $id,
+            'cedula'   => 'string|unique:user,cedula,' . $id,
+            'email'    => 'email|unique:user,email,' . $id,
             'pass'     => 'string'
         ]);
 
@@ -108,4 +109,14 @@ class UserController extends Controller
         //$user->delete();
         return response()->json(['message' => 'no se elimina el usuario']);
     }
-}
+    public function usersByCompany($companyId)
+    {
+        // 1. Get all group IDs that belong to the given company
+        $groupIds = UserGroup::where('company_id', $companyId)->pluck('id');
+
+        // 2. Fetch users whose group_id is within those groups
+        $users = User::whereIn('group_id', $groupIds)->get();
+
+        return response()->json($users, 200);
+    }
+}   
